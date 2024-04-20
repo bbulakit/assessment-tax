@@ -10,7 +10,7 @@ package tax
 	> 2,000,000				= 35 %
 
 	Allowances (value > 0)
-	1.	'personal' as ค่าลดหย่อนส่วนตัว
+	1.	'personalDeduction' as ค่าลดหย่อนส่วนตัว
 	Default: 60,000 (static)
 	Max mod.: 100,000
 	Min.: > 10,000
@@ -39,4 +39,9 @@ type Tax struct {
 type Allowance struct {
 	AllowanceType string  `json:"allowanceType"`
 	Amount        float64 `json:"amount"`
+}
+
+type TaxLevel struct {
+	Level string  `json:"level"`
+	Tax   float64 `json:"tax"`
 }
