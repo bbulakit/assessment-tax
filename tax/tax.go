@@ -45,3 +45,8 @@ type TaxLevel struct {
 	Level string  `json:"level"`
 	Tax   float64 `json:"tax"`
 }
+
+type TaxResponse struct {
+	TotalTax  float64    `json:"tax"`
+	TaxLevels []TaxLevel `json:"taxLevel"`
+}
