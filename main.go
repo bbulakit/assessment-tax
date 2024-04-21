@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/bbulakit/assessment-tax/tax"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -27,6 +28,8 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Go Bootcamp!")
 	})
+
+	e.POST("/tax/calculations", tax.TaxCalculationsHandler)
 
 	go func() {
 		if err := e.Start(":1323"); err != nil && err != http.ErrServerClosed { // Start server
