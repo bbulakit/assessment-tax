@@ -52,7 +52,7 @@ func taxCalculate(itd IncomeTaxDetail) TaxCalculationResult {
 	taxCal -= itd.WithHoldingTax
 
 	tcr.TotalTax = taxCal
-
+	tcr.TaxLevels = taxLevelDetail(itd.TotalIncome, tcr.TotalTax)
 	return tcr
 }
 
@@ -80,4 +80,41 @@ func taxRate(totalIncome float64) float64 {
 		return 0.20
 	}
 	return 0.35
+}
+
+func taxLevelDetail(totalIncome float64, totalTax float64) []TaxLevel {
+	taxLevels := initialTaxLevelDetail()
+
+	if totalIncome <= 150_000 {
+		taxLevels[0].Tax = totalTax
+		return taxLevels
+	}
+
+	if totalIncome <= 500_000 {
+		taxLevels[1].Tax = totalTax
+		return taxLevels
+	}
+
+	if totalIncome <= 1_000_000 {
+		taxLevels[2].Tax = totalTax
+		return taxLevels
+	}
+
+	if totalIncome <= 2_000_000 {
+		taxLevels[3].Tax = totalTax
+		return taxLevels
+	}
+
+	taxLevels[4].Tax = totalTax
+	return taxLevels
+}
+
+func initialTaxLevelDetail() []TaxLevel {
+	return []TaxLevel{
+		{Level: "0-150,000", Tax: 0.0},
+		{"150,001-500,000", 0.0},
+		{"500,001-1,000,000", 0.0},
+		{"1,000,001-2,000,000", 0.0},
+		{"2,000,001 ขึ้นไป", 0.0},
+	}
 }
