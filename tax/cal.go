@@ -7,44 +7,76 @@ import (
 )
 
 func TaxCalculationsHandler(c echo.Context) error {
-	u := Tax{}
-	err := c.Bind(&u)
+	itd := IncomeTaxDetail{}
+	err := c.Bind(&itd)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
 	}
 
-	// row := db.QueryRow("INSERT INTO users (name, age) values ($1, $2)  RETURNING id", u.Allowances, u.Allowances)
-	// err = row.Scan(&u.Allowances)
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-	// }
-	tr := TaxResponse{}
-	tr.TotalTax = 29_000.0
+	tcr := taxCalculate(itd)
 
-	return c.JSON(http.StatusOK, tr)
+	return c.JSON(http.StatusOK, tcr)
 }
 
-func taxCalculate(tax Tax) float64 {
-	cal := tax.TotalIncome
-	for _, deduction := range tax.Allowances {
-		cal -= deduction.Amount
+func taxCalculate(itd IncomeTaxDetail) TaxCalculationResult {
+	tcr := TaxCalculationResult{}
+	taxCal := taxLevelDeduction(itd.TotalIncome)
+
+	//TODO: Get default personal deduction
+	personalDeduction := 60_000.0
+	taxCal -= personalDeduction
+
+	for _, deduction := range itd.Allowances {
+		var actualDeduction float64
+		if deduction.AllowanceType == "donation" {
+			//TODO: Get max. donation deduction
+			maxDonationDeduction := 100_000.0
+			actualDeduction = deduction.Amount
+			if actualDeduction > maxDonationDeduction {
+				actualDeduction = maxDonationDeduction
+			}
+		}
+
+		if deduction.AllowanceType == "k-receipt" {
+			//TODO: Get max. k-receipt deduction
+			maxKReceiptDeduction := 50_000.0 //Default @ 50_000
+			actualDeduction = deduction.Amount
+			if actualDeduction > maxKReceiptDeduction {
+				actualDeduction = maxKReceiptDeduction
+			}
+		}
+		taxCal -= actualDeduction
 	}
 
-	cal -= tax.WithHoldingTax
+	taxCal -= itd.WithHoldingTax
+	taxCal *= taxRate(itd.TotalIncome)
 
-	cal *= taxRate(tax.TotalIncome)
+	tcr.TotalTax = taxCal
 
-	return cal
+	return tcr
+}
+
+func taxLevelDeduction(totalIncome float64) float64 {
+	if totalIncome <= 150_000 {
+		return 0.00
+	} else if totalIncome <= 500_000 {
+		return totalIncome - 150_000
+	} else if totalIncome <= 1_000_000 {
+		return totalIncome - 500_000
+	} else if totalIncome <= 2_000_000 {
+		return totalIncome - 1_000_000
+	}
+	return totalIncome - 2_000_000
 }
 
 func taxRate(totalIncome float64) float64 {
-	if totalIncome <= 150000 {
+	if totalIncome <= 150_000 {
 		return 0.00
-	} else if totalIncome <= 500000 {
+	} else if totalIncome <= 500_000 {
 		return 0.10
-	} else if totalIncome <= 1000000 {
+	} else if totalIncome <= 1_000_000 {
 		return 0.15
-	} else if totalIncome <= 2000000 {
+	} else if totalIncome <= 2_000_000 {
 		return 0.20
 	}
 	return 0.35

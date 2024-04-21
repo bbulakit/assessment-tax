@@ -19,7 +19,7 @@ package tax
 	Max deduction: 100,000
 
 	3.	'k-receipt' as ช้อปลดภาษี
-	Default: 50,000
+	Default max: 50,000
 	Max mod.: 100,000
 	Min.: > 0
 
