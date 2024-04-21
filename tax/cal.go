@@ -105,13 +105,14 @@ func taxLevelDetail(totalIncome float64, totalTax float64) []TaxLevel {
 		return taxLevels
 	}
 
-	taxLevels[3].Tax = totalTax
+	taxLevels[4].Tax = totalTax
 	return taxLevels
 }
 
 func initialTaxLevelDetail() []TaxLevel {
 	return []TaxLevel{
 		{Level: "0-150,000", Tax: 0.0},
+		{"150,001-500,000", 0.0},
 		{"500,001-1,000,000", 0.0},
 		{"1,000,001-2,000,000", 0.0},
 		{"2,000,001 ขึ้นไป", 0.0},
