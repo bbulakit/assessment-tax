@@ -43,6 +43,32 @@ func TestTaxCalulate(t *testing.T) {
 	assert.Equal(t, 29_000.0, tr.TotalTax)
 }
 
+func TestTaxCalulateWithWht(t *testing.T) {
+	body := bytes.NewBufferString(`{
+		"totalIncome": 500000.0,
+		"wht": 25000.0,
+		"allowances": [
+		  {
+			"allowanceType": "donation",
+			"amount": 0.0
+		  }
+		]
+	  }`)
+	tr := struct {
+		TotalTax float64 `json:"tax"`
+	}{}
+
+	res := request(http.MethodPost, uri("tax/calculations"), body)
+	err := res.Decode(&tr)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+	assert.Equal(t, 4_000.0, tr.TotalTax)
+}
+
 func uri(paths ...string) string {
 	apiPort := os.Getenv("PORT")
 	host := "http://localhost:" + apiPort
