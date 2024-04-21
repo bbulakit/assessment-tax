@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 
@@ -95,9 +94,48 @@ func TestTaxCalulateWithDonation(t *testing.T) {
 	assert.Equal(t, 19_000.0, tr.TotalTax)
 }
 
+func TestTaxCalulateAndGetTaxLevelDetail(t *testing.T) {
+	body := bytes.NewBufferString(`{
+		"totalIncome": 500000.0,
+		"wht": 0.0,
+		"allowances": [
+		  {
+			"allowanceType": "donation",
+			"amount": 200000.0
+		  }
+		]
+	  }`)
+	tr := TaxCalculationResult{}
+
+	res := request(http.MethodPost, uri("tax/calculations"), body)
+	err := res.Decode(&tr)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+	assert.Equal(t, 19_000.0, tr.TotalTax)
+
+	expectedTaxLevels := []TaxLevel{
+		{Level: "0-150,000", Tax: 0.0},
+		{Level: "150,001-500,000", Tax: 19000.0},
+		{Level: "500,001-1,000,000", Tax: 0.0},
+		{Level: "1,000,001-2,000,000", Tax: 0.0},
+		{Level: "2,000,001 ขึ้นไป", Tax: 0.0},
+	}
+
+	assert.Equal(t, len(expectedTaxLevels), len(tr.TaxLevels), "Mismatch in number of tax levels")
+	for i, level := range expectedTaxLevels {
+		assert.Equal(t, level.Level, tr.TaxLevels[i].Level, "Mismatch in tax level")
+		assert.Equal(t, level.Tax, tr.TaxLevels[i].Tax, "Mismatch in tax amount for level "+level.Level)
+	}
+
+}
+
 func uri(paths ...string) string {
-	apiPort := os.Getenv("PORT")
-	host := "http://localhost:" + apiPort
+	//apiPort := os.Getenv("PORT")
+	host := "http://localhost:8080"
 	if paths == nil {
 		return host
 	}
