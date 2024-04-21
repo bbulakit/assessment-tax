@@ -29,7 +29,7 @@ package tax
 
 */
 
-type IncomeTaxDetails struct {
+type IncomeTaxDetail struct {
 	TotalIncome    float64     `json:"totalIncome"`
 	WithHoldingTax float64     `json:"wht"`
 	Allowances     []Allowance `json:"allowances"`
@@ -46,7 +46,7 @@ type TaxLevel struct {
 	Tax   float64 `json:"tax"`
 }
 
-type TaxResponse struct {
+type TaxCalculationResult struct {
 	TotalTax  float64    `json:"tax"`
 	TaxLevels []TaxLevel `json:"taxLevel"`
 }
