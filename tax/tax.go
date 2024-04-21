@@ -29,7 +29,7 @@ package tax
 
 */
 
-type Tax struct {
+type IncomeTaxDetails struct {
 	TotalIncome    float64     `json:"totalIncome"`
 	WithHoldingTax float64     `json:"wht"`
 	Allowances     []Allowance `json:"allowances"`
