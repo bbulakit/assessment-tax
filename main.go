@@ -14,9 +14,11 @@ import (
 
 func main() {
 	e := echo.New()
+	apiPort := os.Getenv("PORT")
+	adminUsername := "adminTax" //os.Getenv("ADMIN_USERNAME")
+	adminPassword := "admin!"   //os.Getenv("ADMIN_PASSWORD")
 
-	adminUsername := os.Getenv("ADMIN_USERNAME")
-	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	e.Use(middleware.Logger())
 
 	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 		if username == adminUsername && password == adminPassword {
@@ -32,7 +34,7 @@ func main() {
 	e.POST("/tax/calculations", tax.TaxCalculationsHandler)
 
 	go func() {
-		if err := e.Start(":1323"); err != nil && err != http.ErrServerClosed { // Start server
+		if err := e.Start(":" + apiPort); err != nil && err != http.ErrServerClosed { // Start server
 			e.Logger.Fatal("shutting down the server")
 		}
 	}()
