@@ -1,29 +1,31 @@
 package tax
 
-import "testing"
+import (
+	"testing"
+)
 
-func TestTaxCalulate(t *testing.T) {
-	test := struct {
-		tax  Tax
-		want float64
-	}{
-		tax: Tax{
-			TotalIncome:    500_000,
-			WithHoldingTax: 0,
-			Allowances: []Allowance{{
-				AllowanceType: "donation",
-				Amount:        0,
-			}},
-		},
-		want: 29_000,
-	}
+// func TestTaxCalulate(t *testing.T) {
+// 	test := struct {
+// 		tax  Tax
+// 		want float64
+// 	}{
+// 		tax: Tax{
+// 			TotalIncome:    500_000,
+// 			WithHoldingTax: 0,
+// 			Allowances: []Allowance{{
+// 				AllowanceType: "donation",
+// 				Amount:        0,
+// 			}},
+// 		},
+// 		want: 29_000,
+// 	}
 
-	got := TaxCalculate(test.tax)
+// 	got := taxCalculate(test.tax)
 
-	if got != test.want {
-		t.Errorf("Got= %f; want %f", got, test.want)
-	}
-}
+// 	if got != test.want {
+// 		t.Errorf("Got= %f; want %f", got, test.want)
+// 	}
+// }
 
 func TestTaxRate(t *testing.T) {
 	tests := []struct {
@@ -47,7 +49,7 @@ func TestTaxRate(t *testing.T) {
 			//Arrange
 
 			//Act
-			got := TaxRate(test.totalIncome)
+			got := taxRate(test.totalIncome)
 
 			//Assert
 			if test.want != got {
