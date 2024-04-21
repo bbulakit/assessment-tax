@@ -48,8 +48,8 @@ func taxCalculate(itd IncomeTaxDetail) TaxCalculationResult {
 		taxCal -= actualDeduction
 	}
 
-	taxCal -= itd.WithHoldingTax
 	taxCal *= taxRate(itd.TotalIncome)
+	taxCal -= itd.WithHoldingTax
 
 	tcr.TotalTax = taxCal
 
