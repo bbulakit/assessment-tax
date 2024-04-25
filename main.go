@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/bbulakit/assessment-tax/admin"
 
 	"github.com/bbulakit/assessment-tax/tax"
 	"github.com/labstack/echo/v4"
@@ -15,11 +18,19 @@ import (
 func main() {
 	e := echo.New()
 	apiPort := os.Getenv("PORT")
-	adminUsername := "adminTax" //os.Getenv("ADMIN_USERNAME")
-	adminPassword := "admin!"   //os.Getenv("ADMIN_PASSWORD")
+	adminUsername := "adminTax"                                                                             //os.Getenv("ADMIN_USERNAME")
+	adminPassword := "admin!"                                                                               //os.Getenv("ADMIN_PASSWORD")
+	databaseUrl := "host=localhost port=5432 user=postgres password=postgres dbname=ktaxes sslmode=disable" // os.GetEnv("DATABASE_URL")
+	dbHandler, err := admin.NewDBHandler(databaseUrl)
+
+	if err != nil {
+		fmt.Println("Cannot create new database handlers")
+		return
+	}
+
+	dbHandler.SeedInitialData()
 
 	e.Use(middleware.Logger())
-
 	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 		if username == adminUsername && password == adminPassword {
 			return true, nil
@@ -32,6 +43,9 @@ func main() {
 	})
 
 	e.POST("/tax/calculations", tax.TaxCalculationsHandler)
+	e.GET("/admin/deductions/:name", dbHandler.GetDeductionHandler)
+	e.GET("/admin/deductions/", dbHandler.GetDeductionsHandler)
+	//e.POST("/admin/deductions/:name", admin)
 
 	go func() {
 		if err := e.Start(":" + apiPort); err != nil && err != http.ErrServerClosed { // Start server
