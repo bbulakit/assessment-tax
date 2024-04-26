@@ -1,23 +1,5 @@
 package tax
 
-import (
-	"net/http"
-
-	"github.com/labstack/echo/v4"
-)
-
-func TaxCalculationsHandler(c echo.Context) error {
-	itd := IncomeTaxDetail{}
-	err := c.Bind(&itd)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
-	}
-
-	tcr := taxCalculate(itd)
-
-	return c.JSON(http.StatusOK, tcr)
-}
-
 func taxCalculate(itd IncomeTaxDetail) TaxCalculationResult {
 	tcr := TaxCalculationResult{}
 	taxCal := taxLevelDeduction(itd.TotalIncome)
