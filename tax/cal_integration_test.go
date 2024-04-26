@@ -221,3 +221,49 @@ func TestTaxUploadCsvHandler(t *testing.T) {
 	}
 	assert.Equal(t, expected, result)
 }
+
+func TestMultipleAllowanceStory7(t *testing.T) {
+	e := setup() // Setup the Echo instance
+	body := bytes.NewBufferString(`{
+		"totalIncome": 500000.0,
+		"wht": 0.0,
+		"allowances": [
+		  {
+			"allowanceType": "k-receipt",
+			"amount": 200000.0
+		  },
+		  {
+			"allowanceType": "donation",
+			"amount": 100000.0
+		  }
+		]
+	  }`)
+
+	req := TestHTTPRequest{
+		method:   http.MethodPost,
+		target:   "/tax/calculations",
+		username: "AdminTax", // You could use os.Getenv("ADMIN_USERNAME") here
+		password: "admin!",   // And os.Getenv("ADMIN_PASSWORD") for production
+		body:     body,
+	}
+
+	code, responseBody := testHTTPRequest(e, req)
+
+	assert.Equal(t, http.StatusOK, code)
+
+	var response TaxCalculationResult
+	if err := json.Unmarshal(responseBody, &response); err != nil {
+		t.Fatal("Failed to unmarshal response:", err)
+	}
+
+	expectedTaxLevels := []TaxLevel{
+		{Level: "0-150,000", Tax: 0.0},
+		{Level: "150,001-500,000", Tax: 14_000.0},
+		{Level: "500,001-1,000,000", Tax: 0.0},
+		{Level: "1,000,001-2,000,000", Tax: 0.0},
+		{Level: "2,000,001 ขึ้นไป", Tax: 0.0},
+	}
+
+	assert.Equal(t, 14_000.0, response.TotalTax)
+	assert.Equal(t, expectedTaxLevels, response.TaxLevels, "Mismatch in tax levels")
+}
