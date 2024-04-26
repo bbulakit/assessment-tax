@@ -64,7 +64,7 @@ func TestGetDeductionsHandler(t *testing.T) {
 		expected := []Deduction{
 			{Name: "personalDeduction", Value: 60_000.0},
 			{Name: "donation", Value: 100_000.0},
-			{Name: "kreceipt", Value: 50_000.0},
+			{Name: "kReceipt", Value: 50_000.0},
 		}
 
 		assert.Equal(t, expected, deductions)
@@ -128,5 +128,40 @@ func TestPostDeductionHandler(t *testing.T) {
 
 		assert.Contains(t, responseValue, "personalDeduction")
 		assert.Equal(t, 70_000.0, responseValue["personalDeduction"])
+	}
+}
+
+func TestPostKReceiptDeductionHandler(t *testing.T) {
+	teardown := setup(t)
+	defer teardown()
+
+	e := echo.New()
+
+	deduction := struct {
+		Amount float64 `json:"amount"`
+	}{
+		Amount: 70_000.0,
+	}
+	jsonBody, _ := json.Marshal(deduction)
+
+	req := httptest.NewRequest(http.MethodPost, "/deductions/k-receipt", bytes.NewBuffer(jsonBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	c := e.NewContext(req, rec)
+	c.SetPath("/deductions/:name")
+	c.SetParamNames("name")
+	c.SetParamValues("k-receipt")
+
+	if assert.NoError(t, dbHandler.PostDeductionHandler(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var responseValue map[string]float64
+		if err := json.Unmarshal(rec.Body.Bytes(), &responseValue); err != nil {
+			t.Fatalf("Failed to unmarshal response: %v", err)
+		}
+
+		assert.Contains(t, responseValue, "kReceipt")
+		assert.Equal(t, 70_000.0, responseValue["kReceipt"])
 	}
 }
