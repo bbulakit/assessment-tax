@@ -57,6 +57,15 @@ type TaxCsv struct {
 	Donation    float64 `form:"donation"`
 }
 
+type TaxCsvResult struct {
+	Taxes []TaxCsvResultDetail `json:"taxes"`
+}
+
+type TaxCsvResultDetail struct {
+	TotalIncome float64 `json:"totalIncome"`
+	Tax         float64 `json:"tax"`
+}
+
 type Err struct {
 	Message string `json:"message"`
 }

@@ -44,6 +44,7 @@ func TaxUploadCsvHandler(c echo.Context) error {
 		return err
 	}
 
+	result := TaxCsvResult{}
 	for i, record := range records {
 		if i == 0 {
 			continue // Skip header row
@@ -58,10 +59,27 @@ func TaxUploadCsvHandler(c echo.Context) error {
 		wht, _ := strconv.ParseFloat(record[1], 64)
 		donation, _ := strconv.ParseFloat(record[2], 64)
 
-		fmt.Printf("totalIncome: %.2f, wht: %.2f, donation: %.2f\n", totalIncome, wht, donation)
+		itd := IncomeTaxDetail{
+			TotalIncome:    totalIncome,
+			WithHoldingTax: wht,
+			Allowances: []Allowance{
+				{AllowanceType: "donation", Amount: donation},
+			},
+		}
+
+		taxCal := taxCalculate(itd)
+
+		resultDetail := TaxCsvResultDetail{
+			TotalIncome: totalIncome,
+			Tax:         taxCal.TotalTax,
+		}
+		result.Taxes = append(result.Taxes, resultDetail)
+		//fmt.Printf("totalIncome: %.2f, wht: %.2f, donation: %.2f\n", totalIncome, wht, donation)
 	}
 
-	return c.String(http.StatusOK, "CSV file uploaded successfully")
+	fmt.Println(result)
+
+	return c.JSON(http.StatusOK, result)
 }
 
 func validateCsvData(record []string) error {
