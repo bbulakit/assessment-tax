@@ -38,8 +38,9 @@ func (h *DBHandler) SeedInitialData() error {
         INSERT INTO deductions (name, value) VALUES
         ('personalDeduction', 60000.0),
         ('donation', 100000.0),
-        ('kreceipt', 50000.0)   
-		ON CONFLICT (name) DO NOTHING;     
+        ('kreceipt', 50000.0)
+        ON CONFLICT (name) DO UPDATE
+        SET value = EXCLUDED.value
     `
 	if _, err := h.DB.Exec(seedData); err != nil {
 		log.Println("Error seeding initial data", err)

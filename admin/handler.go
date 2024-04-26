@@ -52,3 +52,56 @@ func (h *DBHandler) GetDeductionHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 }
+
+func (h *DBHandler) PostDeductionHandler(c echo.Context) error {
+	name := c.Param("name")
+
+	name = convertDeductionPathToName(name)
+	type TempDeduction struct {
+		Amount float64 `json:"amount"`
+	}
+
+	var td TempDeduction
+	if err := c.Bind(&td); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	deduction := Deduction{
+		Name:  name,
+		Value: td.Amount,
+	}
+
+	stmt, err := h.DB.Prepare("UPDATE deductions SET value = $2 WHERE name = $1 RETURNING name, value")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(name, deduction.Value).Scan(&deduction.Name, &deduction.Value)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return echo.NewHTTPError(http.StatusNotFound, "Deduction not found")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	response := map[string]float64{deduction.Name: deduction.Value}
+
+	return c.JSON(http.StatusOK, response)
+}
+
+func convertDeductionPathToName(path string) string {
+	if path == "personal" {
+		return "personalDeduction"
+	}
+
+	if path == "donation" {
+		return "donation"
+	}
+
+	if path == "k-receipt" {
+		return "kReceipt"
+	}
+
+	return path
+}
