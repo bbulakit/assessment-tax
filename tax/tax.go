@@ -51,7 +51,11 @@ type TaxCalculationResult struct {
 	TaxLevels []TaxLevel `json:"taxLevel"`
 }
 
-/* End of Allowance Type */
+type TaxCsv struct {
+	TotalIncome float64 `form:"totalIncome"`
+	Wht         float64 `form:"wht"`
+	Donation    float64 `form:"donation"`
+}
 
 type Err struct {
 	Message string `json:"message"`

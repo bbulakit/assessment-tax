@@ -44,6 +44,7 @@ func main() {
 	})
 
 	e.POST("/tax/calculations", tax.TaxCalculationsHandler)
+	e.POST("/tax/calculations/upload-csv", tax.TaxUploadCsvHandler)
 	adminGroup.GET("/admin/deductions/:name", dbHandler.GetDeductionHandler)
 	adminGroup.GET("/admin/deductions/", dbHandler.GetDeductionsHandler)
 	adminGroup.POST("/admin/deductions/:name", dbHandler.PostDeductionHandler)
