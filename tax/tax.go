@@ -33,7 +33,7 @@ type IncomeTaxDetail struct {
 	TotalIncome    float64     `json:"totalIncome"`
 	WithHoldingTax float64     `json:"wht"`
 	Allowances     []Allowance `json:"allowances"`
-	TaxRefund      float64     `json:"taxRefund"`
+	TaxRefund      float64     `json:"taxRefund,omitempty"`
 }
 
 type Allowance struct {
@@ -63,7 +63,8 @@ type TaxCsvResult struct {
 
 type TaxCsvResultDetail struct {
 	TotalIncome float64 `json:"totalIncome"`
-	Tax         float64 `json:"tax"`
+	Tax         float64 `json:"tax,omitempty"`
+	TaxRefund   float64 `json:"taxRefund,omitempty"`
 }
 
 type Err struct {

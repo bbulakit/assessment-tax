@@ -69,15 +69,21 @@ func TaxUploadCsvHandler(c echo.Context) error {
 
 		taxCal := taxCalculate(itd)
 
-		resultDetail := TaxCsvResultDetail{
-			TotalIncome: totalIncome,
-			Tax:         taxCal.TotalTax,
+		var resultDetail TaxCsvResultDetail
+		if taxCal.TotalTax >= 0 {
+			resultDetail = TaxCsvResultDetail{
+				TotalIncome: totalIncome,
+				Tax:         taxCal.TotalTax,
+			}
+		} else {
+			resultDetail = TaxCsvResultDetail{
+				TotalIncome: totalIncome,
+				TaxRefund:   taxCal.TotalTax * -1.0,
+			}
 		}
 		result.Taxes = append(result.Taxes, resultDetail)
 		//fmt.Printf("totalIncome: %.2f, wht: %.2f, donation: %.2f\n", totalIncome, wht, donation)
 	}
-
-	fmt.Println(result)
 
 	return c.JSON(http.StatusOK, result)
 }
