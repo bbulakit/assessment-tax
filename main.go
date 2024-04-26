@@ -31,7 +31,8 @@ func main() {
 	dbHandler.SeedInitialData()
 
 	e.Use(middleware.Logger())
-	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+
+	adminGroup := e.Group("/admin", middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 		if username == adminUsername && password == adminPassword {
 			return true, nil
 		}
@@ -43,9 +44,9 @@ func main() {
 	})
 
 	e.POST("/tax/calculations", tax.TaxCalculationsHandler)
-	e.GET("/admin/deductions/:name", dbHandler.GetDeductionHandler)
-	e.GET("/admin/deductions/", dbHandler.GetDeductionsHandler)
-	e.POST("/admin/deductions/:name", dbHandler.PostDeductionHandler)
+	adminGroup.GET("/admin/deductions/:name", dbHandler.GetDeductionHandler)
+	adminGroup.GET("/admin/deductions/", dbHandler.GetDeductionsHandler)
+	adminGroup.POST("/admin/deductions/:name", dbHandler.PostDeductionHandler)
 
 	go func() {
 		if err := e.Start(":" + apiPort); err != nil && err != http.ErrServerClosed { // Start server
