@@ -45,7 +45,7 @@ func main() {
 	e.POST("/tax/calculations", tax.TaxCalculationsHandler)
 	e.GET("/admin/deductions/:name", dbHandler.GetDeductionHandler)
 	e.GET("/admin/deductions/", dbHandler.GetDeductionsHandler)
-	//e.POST("/admin/deductions/:name", admin)
+	e.POST("/admin/deductions/:name", dbHandler.PostDeductionHandler)
 
 	go func() {
 		if err := e.Start(":" + apiPort); err != nil && err != http.ErrServerClosed { // Start server

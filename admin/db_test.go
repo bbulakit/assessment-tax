@@ -77,7 +77,7 @@ func TestGetDeductionHandler(t *testing.T) {
 
 	e := echo.New()
 
-	req := httptest.NewRequest(http.MethodGet, "/deduction/personal", nil)
+	req := httptest.NewRequest(http.MethodGet, "/deductions/personal", nil)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetParamNames("name")

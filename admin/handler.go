@@ -35,6 +35,7 @@ func (h *DBHandler) GetDeductionsHandler(c echo.Context) error {
 
 func (h *DBHandler) GetDeductionHandler(c echo.Context) error {
 	name := c.Param("name")
+	name = convertDeductionPathToName(name)
 	stmt, err := h.DB.Prepare("SELECT name, value FROM deductions WHERE name = $1")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -55,7 +56,6 @@ func (h *DBHandler) GetDeductionHandler(c echo.Context) error {
 
 func (h *DBHandler) PostDeductionHandler(c echo.Context) error {
 	name := c.Param("name")
-
 	name = convertDeductionPathToName(name)
 	type TempDeduction struct {
 		Amount float64 `json:"amount"`
