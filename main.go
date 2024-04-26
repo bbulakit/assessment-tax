@@ -32,6 +32,9 @@ func main() {
 
 	e.Use(middleware.Logger())
 
+	fmt.Println(adminUsername)
+	fmt.Println(adminPassword)
+	fmt.Println(databaseUrl)
 	adminGroup := e.Group("/admin", middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 		if username == adminUsername && password == adminPassword {
 			return true, nil
@@ -45,9 +48,9 @@ func main() {
 
 	e.POST("/tax/calculations", tax.TaxCalculationsHandler)
 	e.POST("/tax/calculations/upload-csv", tax.TaxUploadCsvHandler)
-	adminGroup.GET("/admin/deductions/:name", dbHandler.GetDeductionHandler)
-	adminGroup.GET("/admin/deductions/", dbHandler.GetDeductionsHandler)
-	adminGroup.POST("/admin/deductions/:name", dbHandler.PostDeductionHandler)
+	adminGroup.GET("/deductions/:name", dbHandler.GetDeductionHandler)
+	adminGroup.GET("/deductions/", dbHandler.GetDeductionsHandler)
+	adminGroup.POST("/deductions/:name", dbHandler.PostDeductionHandler)
 
 	go func() {
 		if err := e.Start(":" + apiPort); err != nil && err != http.ErrServerClosed { // Start server
