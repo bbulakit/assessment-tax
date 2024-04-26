@@ -14,8 +14,8 @@ import (
 var dbHandler *DBHandler
 
 func setup(t *testing.T) func() {
-	t.Parallel()
-	dataSource := "host=localhost port=5432 user=postgres password=postgres dbname=ktaxes sslmode=disable"
+	// t.Parallel()
+	dataSource := "host=localhost port=5432 user=postgres password=postgres dbname=ktaxes sslmode=disable" //os.getEnv()
 	var err error
 	dbHandler, err = NewDBHandler(dataSource)
 	if err != nil {
@@ -27,9 +27,6 @@ func setup(t *testing.T) func() {
 	}
 
 	teardown := func() {
-		if _, err := dbHandler.DB.Exec("DROP TABLE IF EXISTS deductions;"); err != nil {
-			t.Logf("Failed to drop table `deductions`: %v", err)
-		}
 		if err := dbHandler.DB.Close(); err != nil {
 			t.Logf("Failed to close database connection: %v", err)
 		}

@@ -20,7 +20,7 @@ func NewDBHandler(dataSourceName string) (*DBHandler, error) {
 	}
 
 	createTb := `
-		CREATE TABLE IF NOT EXISTS deductions ( id SERIAL PRIMARY KEY, name TEXT, value DOUBLE PRECISION);
+		CREATE TABLE IF NOT EXISTS deductions ( id SERIAL PRIMARY KEY, name TEXT UNIQUE, value DOUBLE PRECISION);
 	`
 
 	_, err = db.Exec(createTb)
@@ -38,7 +38,8 @@ func (h *DBHandler) SeedInitialData() error {
         INSERT INTO deductions (name, value) VALUES
         ('personalDeduction', 60000.0),
         ('donation', 100000.0),
-        ('kreceipt', 50000.0)        
+        ('kreceipt', 50000.0)   
+		ON CONFLICT (name) DO NOTHING;     
     `
 	if _, err := h.DB.Exec(seedData); err != nil {
 		log.Println("Error seeding initial data", err)
