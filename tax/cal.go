@@ -35,6 +35,10 @@ func taxCalculate(itd IncomeTaxDetail) TaxCalculationResult {
 
 	tcr.TotalTax = taxCal
 	tcr.TaxLevels = taxLevelDetail(itd.TotalIncome, tcr.TotalTax)
+	if tcr.TotalTax < 0 {
+		tcr.TaxRefund = tcr.TotalTax * -1.0
+		//tcr.TotalTax = 0
+	}
 	return tcr
 }
 
@@ -66,6 +70,10 @@ func taxRate(totalIncome float64) float64 {
 
 func taxLevelDetail(totalIncome float64, totalTax float64) []TaxLevel {
 	taxLevels := initialTaxLevelDetail()
+
+	if totalTax < 0 {
+		totalTax *= -1
+	}
 
 	if totalIncome <= 150_000 {
 		taxLevels[0].Tax = totalTax

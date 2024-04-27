@@ -4,7 +4,6 @@ type IncomeTaxDetail struct {
 	TotalIncome    float64     `json:"totalIncome"`
 	WithHoldingTax float64     `json:"wht"`
 	Allowances     []Allowance `json:"allowances"`
-	TaxRefund      float64     `json:"taxRefund,omitempty"`
 }
 
 type Allowance struct {
@@ -19,6 +18,7 @@ type TaxLevel struct {
 
 type TaxCalculationResult struct {
 	TotalTax  float64    `json:"tax"`
+	TaxRefund float64    `json:"taxRefund,omitempty"`
 	TaxLevels []TaxLevel `json:"taxLevel"`
 }
 
