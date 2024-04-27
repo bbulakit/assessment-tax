@@ -17,6 +17,11 @@ func TaxCalculationsHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
+	err = validateTaxValues(&itd)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
 	tcr := taxCalculate(itd)
 
 	return c.JSON(http.StatusOK, tcr)
@@ -99,6 +104,22 @@ func validateCsvData(record []string) error {
 		if _, err := strconv.ParseFloat(field, 64); err != nil {
 			return fmt.Errorf("invalid format: %s", err)
 		}
+	}
+
+	return nil
+}
+
+func validateTaxValues(t *IncomeTaxDetail) error {
+	if t.TotalIncome < 0 {
+		return fmt.Errorf("total income (%.2f) cannot be negative", t.TotalIncome)
+	}
+
+	if t.WithHoldingTax < 0 {
+		return fmt.Errorf("wht (%.2f) cannot be negative", t.WithHoldingTax)
+	}
+
+	if t.WithHoldingTax > t.TotalIncome {
+		return fmt.Errorf("wht (%.2f) cannot be greater than total income (%.2f)", t.WithHoldingTax, t.TotalIncome)
 	}
 
 	return nil
