@@ -4,29 +4,6 @@ import (
 	"testing"
 )
 
-// func TestTaxCalulate(t *testing.T) {
-// 	test := struct {
-// 		tax  Tax
-// 		want float64
-// 	}{
-// 		tax: Tax{
-// 			TotalIncome:    500_000,
-// 			WithHoldingTax: 0,
-// 			Allowances: []Allowance{{
-// 				AllowanceType: "donation",
-// 				Amount:        0,
-// 			}},
-// 		},
-// 		want: 29_000,
-// 	}
-
-// 	got := taxCalculate(test.tax)
-
-// 	if got != test.want {
-// 		t.Errorf("Got= %f; want %f", got, test.want)
-// 	}
-// }
-
 func TestTaxRate(t *testing.T) {
 	tests := []struct {
 		name        string

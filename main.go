@@ -18,9 +18,9 @@ import (
 func main() {
 	e := echo.New()
 	apiPort := os.Getenv("PORT")
-	adminUsername := "adminTax"                                                                             //os.Getenv("ADMIN_USERNAME")
-	adminPassword := "admin!"                                                                               //os.Getenv("ADMIN_PASSWORD")
-	databaseUrl := "host=localhost port=5432 user=postgres password=postgres dbname=ktaxes sslmode=disable" // os.GetEnv("DATABASE_URL")
+	adminUsername := os.Getenv("ADMIN_USERNAME")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	databaseUrl := os.Getenv("DATABASE_URL")
 	dbHandler, err := admin.NewDBHandler(databaseUrl)
 
 	if err != nil {
@@ -32,19 +32,12 @@ func main() {
 
 	e.Use(middleware.Logger())
 
-	fmt.Println(adminUsername)
-	fmt.Println(adminPassword)
-	fmt.Println(databaseUrl)
 	adminGroup := e.Group("/admin", middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 		if username == adminUsername && password == adminPassword {
 			return true, nil
 		}
 		return false, nil
 	}))
-
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, Go Bootcamp!")
-	})
 
 	e.POST("/tax/calculations", tax.TaxCalculationsHandler)
 	e.POST("/tax/calculations/upload-csv", tax.TaxUploadCsvHandler)

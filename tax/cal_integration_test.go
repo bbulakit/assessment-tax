@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -57,8 +58,8 @@ func TestTaxCalulate(t *testing.T) {
 	req := TestHTTPRequest{
 		method:   http.MethodPost,
 		target:   "/tax/calculations",
-		username: "AdminTax", //os.Getenv("ADMIN_USERNAME")
-		password: "admin!",   //os.Getenv("ADMIN_PASSWORD")
+		username: os.Getenv("ADMIN_USERNAME"),
+		password: os.Getenv("ADMIN_PASSWORD"),
 		body:     body,
 	}
 	code, responseBody := testHTTPRequest(e, req)
@@ -89,8 +90,8 @@ func TestTaxCalulateWithWht(t *testing.T) {
 	req := TestHTTPRequest{
 		method:   http.MethodPost,
 		target:   "/tax/calculations",
-		username: "AdminTax", //os.Getenv("ADMIN_USERNAME")
-		password: "admin!",   //os.Getenv("ADMIN_PASSWORD")
+		username: os.Getenv("ADMIN_USERNAME"),
+		password: os.Getenv("ADMIN_PASSWORD"),
 		body:     body,
 	}
 	code, responseBody := testHTTPRequest(e, req)
@@ -121,8 +122,8 @@ func TestTaxCalulateWithDonation(t *testing.T) {
 	req := TestHTTPRequest{
 		method:   http.MethodPost,
 		target:   "/tax/calculations",
-		username: "AdminTax", //os.Getenv("ADMIN_USERNAME")
-		password: "admin!",   //os.Getenv("ADMIN_PASSWORD")
+		username: os.Getenv("ADMIN_USERNAME"),
+		password: os.Getenv("ADMIN_PASSWORD"),
 		body:     body,
 	}
 	code, responseBody := testHTTPRequest(e, req)
@@ -154,8 +155,8 @@ func TestTaxCalulateAndGetTaxLevelDetail(t *testing.T) {
 	req := TestHTTPRequest{
 		method:   http.MethodPost,
 		target:   "/tax/calculations",
-		username: "AdminTax", // You could use os.Getenv("ADMIN_USERNAME") here
-		password: "admin!",   // And os.Getenv("ADMIN_PASSWORD") for production
+		username: os.Getenv("ADMIN_USERNAME"),
+		password: os.Getenv("ADMIN_PASSWORD"),
 		body:     body,
 	}
 
@@ -242,8 +243,8 @@ func TestMultipleAllowanceStory7(t *testing.T) {
 	req := TestHTTPRequest{
 		method:   http.MethodPost,
 		target:   "/tax/calculations",
-		username: "AdminTax", // You could use os.Getenv("ADMIN_USERNAME") here
-		password: "admin!",   // And os.Getenv("ADMIN_PASSWORD") for production
+		username: os.Getenv("ADMIN_USERNAME"),
+		password: os.Getenv("ADMIN_PASSWORD"),
 		body:     body,
 	}
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/labstack/echo/v4"
@@ -16,7 +17,7 @@ var dbHandler *DBHandler
 
 func setup(t *testing.T) func() {
 	//t.Parallel()
-	dataSource := "host=localhost port=5432 user=postgres password=postgres dbname=ktaxes sslmode=disable" //os.getEnv()
+	dataSource := os.Getenv("DATABASE_URL")
 	var err error
 	dbHandler, err = NewDBHandler(dataSource)
 	if err != nil {
