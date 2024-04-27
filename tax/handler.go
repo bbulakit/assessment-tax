@@ -17,8 +17,7 @@ func TaxCalculationsHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	err = validateTaxValues(&itd)
-	if err != nil {
+	if err := validateTaxValues(&itd); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
@@ -70,6 +69,11 @@ func TaxUploadCsvHandler(c echo.Context) error {
 			Allowances: []Allowance{
 				{AllowanceType: "donation", Amount: donation},
 			},
+		}
+
+		if err := validateTaxValues(&itd); err != nil {
+			fmt.Println(err)
+			return err
 		}
 
 		taxCal := taxCalculate(itd)
