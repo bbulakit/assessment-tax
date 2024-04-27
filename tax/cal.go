@@ -1,11 +1,24 @@
 package tax
 
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
+)
+
 func taxCalculate(itd IncomeTaxDetail) TaxCalculationResult {
 	tcr := TaxCalculationResult{}
 	taxCal := taxLevelDeduction(itd.TotalIncome)
 
-	//TODO: Get default personal deduction
+	// personalDeduction := GetDeduction("personal")
+	// if personalDeduction <= 0 {
+
+	// }
+
 	personalDeduction := 60_000.0
+
 	taxCal -= personalDeduction
 
 	for _, deduction := range itd.Allowances {
@@ -107,4 +120,40 @@ func initialTaxLevelDetail() []TaxLevel {
 		{"1,000,001-2,000,000", 0.0},
 		{"2,000,001 ขึ้นไป", 0.0},
 	}
+}
+
+type Deduction struct {
+	Name  string
+	Value float64
+}
+
+func GetDeduction(name string) float64 {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", fmt.Sprintf("admin/deductions/%s", name), nil)
+	if err != nil {
+		return 0.0
+	}
+
+	adminUsername := os.Getenv("ADMIN_USERNAME")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+
+	req.SetBasicAuth(adminUsername, adminPassword)
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0.0
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0.0
+	}
+
+	var deduction Deduction
+	err = json.Unmarshal(body, &deduction)
+	if err != nil {
+		return 0.0
+	}
+
+	return deduction.Value
 }

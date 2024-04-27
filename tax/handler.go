@@ -122,5 +122,15 @@ func validateTaxValues(t *IncomeTaxDetail) error {
 		return fmt.Errorf("wht (%.2f) cannot be greater than total income (%.2f)", t.WithHoldingTax, t.TotalIncome)
 	}
 
+	for _, allowance := range t.Allowances {
+		if strings.Contains(strings.ToLower(allowance.AllowanceType), "personal") || strings.Contains(strings.ToLower(allowance.AllowanceType), "receipt") || allowance.AllowanceType == "donation" {
+			if allowance.Amount < 0 {
+				return fmt.Errorf("allowance amount (%.2f) cannot be negative", allowance.Amount)
+			}
+		} else {
+			return fmt.Errorf("invalid allowance type: %s", allowance.AllowanceType)
+		}
+	}
+
 	return nil
 }
