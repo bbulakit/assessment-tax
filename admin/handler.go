@@ -71,6 +71,8 @@ func (h *DBHandler) PostDeductionHandler(c echo.Context) error {
 		Value: td.Amount,
 	}
 
+	validateDeductionValue(&deduction)
+
 	stmt, err := h.DB.Prepare("UPDATE deductions SET value = $2 WHERE name = $1 RETURNING name, value")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -104,4 +106,36 @@ func convertDeductionPathToName(path string) string {
 	}
 
 	return path
+}
+
+func validateDeductionValue(d *Deduction) {
+	if d.Name == "personalDeduction" {
+		if d.Value >= 100_000.0 {
+			d.Value = 100_000.0
+		}
+
+		if d.Value < 10_000.0 {
+			d.Value = 10_000.0
+		}
+	}
+
+	if d.Name == "donation" {
+		if d.Value >= 100_000.0 {
+			d.Value = 100_000.0
+		}
+
+		if d.Value < 0.0 {
+			d.Value = 0.0
+		}
+	}
+
+	if d.Name == "kReceipt" {
+		if d.Value >= 100_000.0 {
+			d.Value = 100_000.0
+		}
+
+		if d.Value < 0.0 {
+			d.Value = 0.0
+		}
+	}
 }

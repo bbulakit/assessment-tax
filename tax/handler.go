@@ -17,6 +17,10 @@ func TaxCalculationsHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
+	if err := validateTaxValues(&itd); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
 	tcr := taxCalculate(itd)
 
 	return c.JSON(http.StatusOK, tcr)
@@ -67,6 +71,11 @@ func TaxUploadCsvHandler(c echo.Context) error {
 			},
 		}
 
+		if err := validateTaxValues(&itd); err != nil {
+			fmt.Println(err)
+			return err
+		}
+
 		taxCal := taxCalculate(itd)
 
 		var resultDetail TaxCsvResultDetail
@@ -98,6 +107,32 @@ func validateCsvData(record []string) error {
 	for _, field := range record {
 		if _, err := strconv.ParseFloat(field, 64); err != nil {
 			return fmt.Errorf("invalid format: %s", err)
+		}
+	}
+
+	return nil
+}
+
+func validateTaxValues(t *IncomeTaxDetail) error {
+	if t.TotalIncome < 0 {
+		return fmt.Errorf("total income (%.2f) cannot be negative", t.TotalIncome)
+	}
+
+	if t.WithHoldingTax < 0 {
+		return fmt.Errorf("wht (%.2f) cannot be negative", t.WithHoldingTax)
+	}
+
+	if t.WithHoldingTax > t.TotalIncome {
+		return fmt.Errorf("wht (%.2f) cannot be greater than total income (%.2f)", t.WithHoldingTax, t.TotalIncome)
+	}
+
+	for _, allowance := range t.Allowances {
+		if strings.Contains(strings.ToLower(allowance.AllowanceType), "personal") || strings.Contains(strings.ToLower(allowance.AllowanceType), "receipt") || allowance.AllowanceType == "donation" {
+			if allowance.Amount < 0 {
+				return fmt.Errorf("allowance amount (%.2f) cannot be negative", allowance.Amount)
+			}
+		} else {
+			return fmt.Errorf("invalid allowance type: %s", allowance.AllowanceType)
 		}
 	}
 

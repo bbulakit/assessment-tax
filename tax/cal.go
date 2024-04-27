@@ -1,18 +1,33 @@
 package tax
 
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
+)
+
 func taxCalculate(itd IncomeTaxDetail) TaxCalculationResult {
 	tcr := TaxCalculationResult{}
 	taxCal := taxLevelDeduction(itd.TotalIncome)
 
-	//TODO: Get default personal deduction
-	personalDeduction := 60_000.0
+	personalDeduction := GetDeduction("personal")
+	if personalDeduction <= 0 {
+		personalDeduction = 60_000.0
+	}
+
 	taxCal -= personalDeduction
 
 	for _, deduction := range itd.Allowances {
 		var actualDeduction float64
 		if deduction.AllowanceType == "donation" {
-			//TODO: Get max. donation deduction
-			maxDonationDeduction := 100_000.0
+
+			maxDonationDeduction := GetDeduction("donation")
+			if maxDonationDeduction <= 0 {
+				maxDonationDeduction = 100_000.0
+			}
+
 			actualDeduction = deduction.Amount
 			if actualDeduction > maxDonationDeduction {
 				actualDeduction = maxDonationDeduction
@@ -20,8 +35,12 @@ func taxCalculate(itd IncomeTaxDetail) TaxCalculationResult {
 		}
 
 		if deduction.AllowanceType == "k-receipt" {
-			//TODO: Get max. k-receipt deduction
-			maxKReceiptDeduction := 50_000.0 //Default @ 50_000
+
+			maxKReceiptDeduction := GetDeduction("donation")
+			if maxKReceiptDeduction <= 0 {
+				maxKReceiptDeduction = 50_000.0
+			}
+
 			actualDeduction = deduction.Amount
 			if actualDeduction > maxKReceiptDeduction {
 				actualDeduction = maxKReceiptDeduction
@@ -107,4 +126,47 @@ func initialTaxLevelDetail() []TaxLevel {
 		{"1,000,001-2,000,000", 0.0},
 		{"2,000,001 ขึ้นไป", 0.0},
 	}
+}
+
+type Deduction struct {
+	Name  string
+	Value float64
+}
+
+func GetDeduction(name string) float64 {
+	client := &http.Client{}
+	apiPort := os.Getenv("PORT")
+	req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%s/admin/deductions/%s", apiPort, name), nil)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return 0.0
+	}
+
+	adminUsername := os.Getenv("ADMIN_USERNAME")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+
+	req.SetBasicAuth(adminUsername, adminPassword)
+	resp, err := client.Do(req)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return 0.0
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+		return 0.0
+	}
+
+	var deduction Deduction
+	err = json.Unmarshal(body, &deduction)
+	if err != nil {
+		fmt.Println(err.Error())
+		return 0.0
+	}
+
+	return deduction.Value
 }
