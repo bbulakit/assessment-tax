@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/bbulakit/assessment-tax/tax/cal.go (11.1%)</option>
+				<option value="file0">github.com/bbulakit/assessment-tax/tax/cal.go (21.1%)</option>
 				
 				<option value="file1">github.com/bbulakit/assessment-tax/tax/handler.go (0.0%)</option>
 				
@@ -134,17 +134,17 @@ func taxCalculate(itd IncomeTaxDetail) TaxCalculationResult <span class="cov0" t
         <span class="cov0" title="0">return tcr</span>
 }
 
-func taxLevelDeduction(totalIncome float64) float64 <span class="cov0" title="0">{
-        if totalIncome &lt;= 150_000 </span><span class="cov0" title="0">{
+func taxLevelDeduction(totalIncome float64) float64 <span class="cov8" title="1">{
+        if totalIncome &lt;= 150_000 </span><span class="cov8" title="1">{
                 return 0.00
-        }</span> else<span class="cov0" title="0"> if totalIncome &lt;= 500_000 </span><span class="cov0" title="0">{
+        }</span> else<span class="cov8" title="1"> if totalIncome &lt;= 500_000 </span><span class="cov8" title="1">{
                 return totalIncome - 150_000
-        }</span> else<span class="cov0" title="0"> if totalIncome &lt;= 1_000_000 </span><span class="cov0" title="0">{
+        }</span> else<span class="cov8" title="1"> if totalIncome &lt;= 1_000_000 </span><span class="cov8" title="1">{
                 return totalIncome - 500_000
-        }</span> else<span class="cov0" title="0"> if totalIncome &lt;= 2_000_000 </span><span class="cov0" title="0">{
+        }</span> else<span class="cov8" title="1"> if totalIncome &lt;= 2_000_000 </span><span class="cov8" title="1">{
                 return totalIncome - 1_000_000
         }</span>
-        <span class="cov0" title="0">return totalIncome - 2_000_000</span>
+        <span class="cov8" title="1">return totalIncome - 2_000_000</span>
 }
 
 func taxRate(totalIncome float64) float64 <span class="cov8" title="1">{

@@ -52,3 +52,24 @@ func TestInitialTaxLevelDetail(t *testing.T) {
 
 	assert.Equal(t, want, got)
 }
+
+func TestTaxLevelDeduction(t *testing.T) {
+	tests := []struct {
+		name           string
+		totalIncome    float64
+		expectedResult float64
+	}{
+		{name: "income < 150,000", totalIncome: 100_000, expectedResult: 0.00},
+		{"income between 150,000 and 500,000", 300_000, 150_000},
+		{"income between 500,000 and 1,000,000", 750_000, 250_000},
+		{"income between 1,000,000 and 2,000,000", 1_500_000, 500_000},
+		{"income > 2,000,000", 2_500_000, 500_000},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := taxLevelDeduction(tt.totalIncome)
+			assert.Equal(t, tt.expectedResult, got)
+		})
+	}
+}
