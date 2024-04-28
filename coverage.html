@@ -1,0 +1,419 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>tax: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/bbulakit/assessment-tax/tax/cal.go (10.0%)</option>
+				
+				<option value="file1">github.com/bbulakit/assessment-tax/tax/handler.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package tax
+
+import (
+        "encoding/json"
+        "fmt"
+        "io/ioutil"
+        "net/http"
+        "os"
+)
+
+func taxCalculate(itd IncomeTaxDetail) TaxCalculationResult <span class="cov0" title="0">{
+        tcr := TaxCalculationResult{}
+        taxCal := taxLevelDeduction(itd.TotalIncome)
+
+        personalDeduction := GetDeduction("personal")
+        if personalDeduction &lt;= 0 </span><span class="cov0" title="0">{
+                personalDeduction = 60_000.0
+        }</span>
+
+        <span class="cov0" title="0">taxCal -= personalDeduction
+
+        for _, deduction := range itd.Allowances </span><span class="cov0" title="0">{
+                var actualDeduction float64
+                if deduction.AllowanceType == "donation" </span><span class="cov0" title="0">{
+
+                        maxDonationDeduction := GetDeduction("donation")
+                        if maxDonationDeduction &lt;= 0 </span><span class="cov0" title="0">{
+                                maxDonationDeduction = 100_000.0
+                        }</span>
+
+                        <span class="cov0" title="0">actualDeduction = deduction.Amount
+                        if actualDeduction &gt; maxDonationDeduction </span><span class="cov0" title="0">{
+                                actualDeduction = maxDonationDeduction
+                        }</span>
+                }
+
+                <span class="cov0" title="0">if deduction.AllowanceType == "k-receipt" </span><span class="cov0" title="0">{
+
+                        maxKReceiptDeduction := GetDeduction("donation")
+                        if maxKReceiptDeduction &lt;= 0 </span><span class="cov0" title="0">{
+                                maxKReceiptDeduction = 50_000.0
+                        }</span>
+
+                        <span class="cov0" title="0">actualDeduction = deduction.Amount
+                        if actualDeduction &gt; maxKReceiptDeduction </span><span class="cov0" title="0">{
+                                actualDeduction = maxKReceiptDeduction
+                        }</span>
+                }
+                <span class="cov0" title="0">taxCal -= actualDeduction</span>
+        }
+
+        <span class="cov0" title="0">taxCal *= taxRate(itd.TotalIncome)
+        taxCal -= itd.WithHoldingTax
+
+        tcr.TotalTax = taxCal
+        tcr.TaxLevels = taxLevelDetail(itd.TotalIncome, tcr.TotalTax)
+        if tcr.TotalTax &lt; 0 </span><span class="cov0" title="0">{
+                tcr.TaxRefund = tcr.TotalTax * -1.0
+                //tcr.TotalTax = 0
+        }</span>
+        <span class="cov0" title="0">return tcr</span>
+}
+
+func taxLevelDeduction(totalIncome float64) float64 <span class="cov0" title="0">{
+        if totalIncome &lt;= 150_000 </span><span class="cov0" title="0">{
+                return 0.00
+        }</span> else<span class="cov0" title="0"> if totalIncome &lt;= 500_000 </span><span class="cov0" title="0">{
+                return totalIncome - 150_000
+        }</span> else<span class="cov0" title="0"> if totalIncome &lt;= 1_000_000 </span><span class="cov0" title="0">{
+                return totalIncome - 500_000
+        }</span> else<span class="cov0" title="0"> if totalIncome &lt;= 2_000_000 </span><span class="cov0" title="0">{
+                return totalIncome - 1_000_000
+        }</span>
+        <span class="cov0" title="0">return totalIncome - 2_000_000</span>
+}
+
+func taxRate(totalIncome float64) float64 <span class="cov8" title="1">{
+        if totalIncome &lt;= 150_000 </span><span class="cov8" title="1">{
+                return 0.00
+        }</span> else<span class="cov8" title="1"> if totalIncome &lt;= 500_000 </span><span class="cov8" title="1">{
+                return 0.10
+        }</span> else<span class="cov8" title="1"> if totalIncome &lt;= 1_000_000 </span><span class="cov8" title="1">{
+                return 0.15
+        }</span> else<span class="cov8" title="1"> if totalIncome &lt;= 2_000_000 </span><span class="cov8" title="1">{
+                return 0.20
+        }</span>
+        <span class="cov8" title="1">return 0.35</span>
+}
+
+func taxLevelDetail(totalIncome float64, totalTax float64) []TaxLevel <span class="cov0" title="0">{
+        taxLevels := initialTaxLevelDetail()
+
+        if totalTax &lt; 0 </span><span class="cov0" title="0">{
+                totalTax *= -1
+        }</span>
+
+        <span class="cov0" title="0">if totalIncome &lt;= 150_000 </span><span class="cov0" title="0">{
+                taxLevels[0].Tax = totalTax
+                return taxLevels
+        }</span>
+
+        <span class="cov0" title="0">if totalIncome &lt;= 500_000 </span><span class="cov0" title="0">{
+                taxLevels[1].Tax = totalTax
+                return taxLevels
+        }</span>
+
+        <span class="cov0" title="0">if totalIncome &lt;= 1_000_000 </span><span class="cov0" title="0">{
+                taxLevels[2].Tax = totalTax
+                return taxLevels
+        }</span>
+
+        <span class="cov0" title="0">if totalIncome &lt;= 2_000_000 </span><span class="cov0" title="0">{
+                taxLevels[3].Tax = totalTax
+                return taxLevels
+        }</span>
+
+        <span class="cov0" title="0">taxLevels[4].Tax = totalTax
+        return taxLevels</span>
+}
+
+func initialTaxLevelDetail() []TaxLevel <span class="cov0" title="0">{
+        return []TaxLevel{
+                {Level: "0-150,000", Tax: 0.0},
+                {"150,001-500,000", 0.0},
+                {"500,001-1,000,000", 0.0},
+                {"1,000,001-2,000,000", 0.0},
+                {"2,000,001 ขึ้นไป", 0.0},
+        }
+}</span>
+
+type Deduction struct {
+        Name  string
+        Value float64
+}
+
+func GetDeduction(name string) float64 <span class="cov0" title="0">{
+        client := &amp;http.Client{}
+        apiPort := os.Getenv("PORT")
+        req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%s/admin/deductions/%s", apiPort, name), nil)
+
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err.Error())
+                return 0.0
+        }</span>
+
+        <span class="cov0" title="0">adminUsername := os.Getenv("ADMIN_USERNAME")
+        adminPassword := os.Getenv("ADMIN_PASSWORD")
+
+        req.SetBasicAuth(adminUsername, adminPassword)
+        resp, err := client.Do(req)
+
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err.Error())
+                return 0.0
+        }</span>
+        <span class="cov0" title="0">defer resp.Body.Close()
+
+        body, err := ioutil.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err.Error())
+                return 0.0
+        }</span>
+
+        <span class="cov0" title="0">var deduction Deduction
+        err = json.Unmarshal(body, &amp;deduction)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err.Error())
+                return 0.0
+        }</span>
+
+        <span class="cov0" title="0">return deduction.Value</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package tax
+
+import (
+        "encoding/csv"
+        "fmt"
+        "net/http"
+        "strconv"
+        "strings"
+
+        "github.com/labstack/echo/v4"
+)
+
+func TaxCalculationsHandler(c echo.Context) error <span class="cov0" title="0">{
+        itd := IncomeTaxDetail{}
+        err := c.Bind(&amp;itd)
+        if err != nil </span><span class="cov0" title="0">{
+                return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+        }</span>
+
+        <span class="cov0" title="0">if err := validateTaxValues(&amp;itd); err != nil </span><span class="cov0" title="0">{
+                return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+        }</span>
+
+        <span class="cov0" title="0">tcr := taxCalculate(itd)
+
+        return c.JSON(http.StatusOK, tcr)</span>
+}
+
+func TaxUploadCsvHandler(c echo.Context) error <span class="cov0" title="0">{
+        file, err := c.FormFile("taxFile")
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err)
+                return err
+        }</span>
+
+        <span class="cov0" title="0">src, err := file.Open()
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err)
+                return err
+        }</span>
+        <span class="cov0" title="0">defer src.Close()
+
+        reader := csv.NewReader(src)
+
+        records, err := reader.ReadAll()
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err)
+                return err
+        }</span>
+
+        <span class="cov0" title="0">result := TaxCsvResult{}
+        for i, record := range records </span><span class="cov0" title="0">{
+                if i == 0 </span><span class="cov0" title="0">{
+                        continue</span> // Skip header row
+                }
+
+                <span class="cov0" title="0">if err := validateCsvData(record); err != nil </span><span class="cov0" title="0">{
+                        fmt.Println(err)
+                        return err
+                }</span>
+
+                <span class="cov0" title="0">totalIncome, _ := strconv.ParseFloat(record[0], 64)
+                wht, _ := strconv.ParseFloat(record[1], 64)
+                donation, _ := strconv.ParseFloat(record[2], 64)
+
+                itd := IncomeTaxDetail{
+                        TotalIncome:    totalIncome,
+                        WithHoldingTax: wht,
+                        Allowances: []Allowance{
+                                {AllowanceType: "donation", Amount: donation},
+                        },
+                }
+
+                if err := validateTaxValues(&amp;itd); err != nil </span><span class="cov0" title="0">{
+                        fmt.Println(err)
+                        return err
+                }</span>
+
+                <span class="cov0" title="0">taxCal := taxCalculate(itd)
+
+                var resultDetail TaxCsvResultDetail
+                if taxCal.TotalTax &gt;= 0 </span><span class="cov0" title="0">{
+                        resultDetail = TaxCsvResultDetail{
+                                TotalIncome: totalIncome,
+                                Tax:         taxCal.TotalTax,
+                        }
+                }</span> else<span class="cov0" title="0"> {
+                        resultDetail = TaxCsvResultDetail{
+                                TotalIncome: totalIncome,
+                                TaxRefund:   taxCal.TotalTax * -1.0,
+                        }
+                }</span>
+                <span class="cov0" title="0">result.Taxes = append(result.Taxes, resultDetail)</span>
+                //fmt.Printf("totalIncome: %.2f, wht: %.2f, donation: %.2f\n", totalIncome, wht, donation)
+        }
+
+        <span class="cov0" title="0">return c.JSON(http.StatusOK, result)</span>
+}
+
+func validateCsvData(record []string) error <span class="cov0" title="0">{
+        for _, field := range record </span><span class="cov0" title="0">{
+                if strings.TrimSpace(field) == "" </span><span class="cov0" title="0">{
+                        return fmt.Errorf("all values must be non-empty")
+                }</span>
+        }
+
+        <span class="cov0" title="0">for _, field := range record </span><span class="cov0" title="0">{
+                if _, err := strconv.ParseFloat(field, 64); err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("invalid format: %s", err)
+                }</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func validateTaxValues(t *IncomeTaxDetail) error <span class="cov0" title="0">{
+        if t.TotalIncome &lt; 0 </span><span class="cov0" title="0">{
+                return fmt.Errorf("total income (%.2f) cannot be negative", t.TotalIncome)
+        }</span>
+
+        <span class="cov0" title="0">if t.WithHoldingTax &lt; 0 </span><span class="cov0" title="0">{
+                return fmt.Errorf("wht (%.2f) cannot be negative", t.WithHoldingTax)
+        }</span>
+
+        <span class="cov0" title="0">if t.WithHoldingTax &gt; t.TotalIncome </span><span class="cov0" title="0">{
+                return fmt.Errorf("wht (%.2f) cannot be greater than total income (%.2f)", t.WithHoldingTax, t.TotalIncome)
+        }</span>
+
+        <span class="cov0" title="0">for _, allowance := range t.Allowances </span><span class="cov0" title="0">{
+                if strings.Contains(strings.ToLower(allowance.AllowanceType), "personal") || strings.Contains(strings.ToLower(allowance.AllowanceType), "receipt") || allowance.AllowanceType == "donation" </span><span class="cov0" title="0">{
+                        if allowance.Amount &lt; 0 </span><span class="cov0" title="0">{
+                                return fmt.Errorf("allowance amount (%.2f) cannot be negative", allowance.Amount)
+                        }</span>
+                } else<span class="cov0" title="0"> {
+                        return fmt.Errorf("invalid allowance type: %s", allowance.AllowanceType)
+                }</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
