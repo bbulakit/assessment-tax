@@ -259,3 +259,32 @@ func TestMultipleAllowanceStory7(t *testing.T) {
 	assert.Equal(t, 14_000.0, response.TotalTax)
 	assert.Equal(t, expectedTaxLevels, response.TaxLevels, "Mismatch in tax levels")
 }
+func TestValidateCsvDataIfEmptyValueFound(t *testing.T) {
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("taxFile", "taxes.csv")
+	if err != nil {
+		t.Fatal("Failed to create form file:", err)
+	}
+	// Insert CSV data with an empty value
+	csvData := "totalIncome,wht,donation\n" +
+		"500000,0,0\n" +
+		"600000,40000,\n" +
+		"750000,50000,15000\n"
+	_, err = io.Copy(part, strings.NewReader(csvData))
+	if err != nil {
+		t.Fatal("Failed to write CSV data to form file:", err)
+	}
+	writer.Close()
+
+	req := httptest.NewRequest(http.MethodPost, "/tax/calculations/upload-csv", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	rec := httptest.NewRecorder()
+
+	// Call the handler function
+	TaxUploadCsvHandler(echo.New().NewContext(req, rec))
+
+	// Check the response status code
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+}

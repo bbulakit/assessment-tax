@@ -11,6 +11,10 @@ import (
 )
 
 func TaxCalculationsHandler(c echo.Context) error {
+	if c.Request().Body == http.NoBody {
+		return c.JSON(http.StatusBadRequest, "Empty request body")
+	}
+
 	itd := IncomeTaxDetail{}
 	err := c.Bind(&itd)
 	if err != nil {
@@ -27,16 +31,18 @@ func TaxCalculationsHandler(c echo.Context) error {
 }
 
 func TaxUploadCsvHandler(c echo.Context) error {
+	if c.Request().Body == http.NoBody {
+		return c.JSON(http.StatusBadRequest, "Empty request body")
+	}
+
 	file, err := c.FormFile("taxFile")
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return c.JSON(http.StatusUnprocessableEntity, err)
 	}
 	defer src.Close()
 
@@ -44,8 +50,7 @@ func TaxUploadCsvHandler(c echo.Context) error {
 
 	records, err := reader.ReadAll()
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	result := TaxCsvResult{}
@@ -55,8 +60,7 @@ func TaxUploadCsvHandler(c echo.Context) error {
 		}
 
 		if err := validateCsvData(record); err != nil {
-			fmt.Println(err)
-			return err
+			return c.JSON(http.StatusBadRequest, err)
 		}
 
 		totalIncome, _ := strconv.ParseFloat(record[0], 64)
@@ -73,7 +77,7 @@ func TaxUploadCsvHandler(c echo.Context) error {
 
 		if err := validateTaxValues(&itd); err != nil {
 			fmt.Println(err)
-			return err
+			return c.JSON(http.StatusBadRequest, err)
 		}
 
 		taxCal := taxCalculate(itd)
@@ -106,7 +110,7 @@ func validateCsvData(record []string) error {
 
 	for _, field := range record {
 		if _, err := strconv.ParseFloat(field, 64); err != nil {
-			return fmt.Errorf("invalid format: %s", err)
+			return fmt.Errorf("invalid format")
 		}
 	}
 
