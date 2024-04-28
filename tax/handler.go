@@ -29,14 +29,12 @@ func TaxCalculationsHandler(c echo.Context) error {
 func TaxUploadCsvHandler(c echo.Context) error {
 	file, err := c.FormFile("taxFile")
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return c.JSON(http.StatusUnprocessableEntity, err)
 	}
 	defer src.Close()
 
@@ -44,8 +42,7 @@ func TaxUploadCsvHandler(c echo.Context) error {
 
 	records, err := reader.ReadAll()
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return c.JSON(http.StatusBadRequest, err)
 	}
 
 	result := TaxCsvResult{}
@@ -55,8 +52,7 @@ func TaxUploadCsvHandler(c echo.Context) error {
 		}
 
 		if err := validateCsvData(record); err != nil {
-			fmt.Println(err)
-			return err
+			return c.JSON(http.StatusBadRequest, err)
 		}
 
 		totalIncome, _ := strconv.ParseFloat(record[0], 64)
@@ -73,7 +69,7 @@ func TaxUploadCsvHandler(c echo.Context) error {
 
 		if err := validateTaxValues(&itd); err != nil {
 			fmt.Println(err)
-			return err
+			return c.JSON(http.StatusBadRequest, err)
 		}
 
 		taxCal := taxCalculate(itd)
