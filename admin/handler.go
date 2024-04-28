@@ -55,6 +55,10 @@ func (h *DBHandler) GetDeductionHandler(c echo.Context) error {
 }
 
 func (h *DBHandler) PostDeductionHandler(c echo.Context) error {
+	if c.Request().Body == http.NoBody {
+		return c.JSON(http.StatusBadRequest, "Empty request body")
+	}
+
 	name := c.Param("name")
 	name = convertDeductionPathToName(name)
 	type TempDeduction struct {

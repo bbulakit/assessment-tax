@@ -11,6 +11,10 @@ import (
 )
 
 func TaxCalculationsHandler(c echo.Context) error {
+	if c.Request().Body == http.NoBody {
+		return c.JSON(http.StatusBadRequest, "Empty request body")
+	}
+
 	itd := IncomeTaxDetail{}
 	err := c.Bind(&itd)
 	if err != nil {
@@ -27,6 +31,10 @@ func TaxCalculationsHandler(c echo.Context) error {
 }
 
 func TaxUploadCsvHandler(c echo.Context) error {
+	if c.Request().Body == http.NoBody {
+		return c.JSON(http.StatusBadRequest, "Empty request body")
+	}
+
 	file, err := c.FormFile("taxFile")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err)

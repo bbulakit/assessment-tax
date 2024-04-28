@@ -57,7 +57,7 @@
 				
 				<option value="file0">github.com/bbulakit/assessment-tax/tax/cal.go (84.4%)</option>
 				
-				<option value="file1">github.com/bbulakit/assessment-tax/tax/handler.go (87.9%)</option>
+				<option value="file1">github.com/bbulakit/assessment-tax/tax/handler.go (85.5%)</option>
 				
 				</select>
 			</div>
@@ -258,7 +258,11 @@ import (
 )
 
 func TaxCalculationsHandler(c echo.Context) error <span class="cov8" title="1">{
-        itd := IncomeTaxDetail{}
+        if c.Request().Body == http.NoBody </span><span class="cov0" title="0">{
+                return c.JSON(http.StatusBadRequest, "Empty request body")
+        }</span>
+
+        <span class="cov8" title="1">itd := IncomeTaxDetail{}
         err := c.Bind(&amp;itd)
         if err != nil </span><span class="cov0" title="0">{
                 return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
@@ -274,7 +278,11 @@ func TaxCalculationsHandler(c echo.Context) error <span class="cov8" title="1">{
 }
 
 func TaxUploadCsvHandler(c echo.Context) error <span class="cov8" title="1">{
-        file, err := c.FormFile("taxFile")
+        if c.Request().Body == http.NoBody </span><span class="cov0" title="0">{
+                return c.JSON(http.StatusBadRequest, "Empty request body")
+        }</span>
+
+        <span class="cov8" title="1">file, err := c.FormFile("taxFile")
         if err != nil </span><span class="cov0" title="0">{
                 return c.JSON(http.StatusBadRequest, err)
         }</span>
