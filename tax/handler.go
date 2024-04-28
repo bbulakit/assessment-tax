@@ -102,7 +102,7 @@ func validateCsvData(record []string) error {
 
 	for _, field := range record {
 		if _, err := strconv.ParseFloat(field, 64); err != nil {
-			return fmt.Errorf("invalid format: %s", err)
+			return fmt.Errorf("invalid format")
 		}
 	}
 

@@ -73,3 +73,46 @@ func TestTaxLevelDeduction(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateCsvData(t *testing.T) {
+	tests := []struct {
+		record []string
+		errMsg string
+	}{
+		{record: []string{"500000", "0", "0"}, errMsg: ""},
+		{record: []string{"600000", "40000", ""}, errMsg: "all values must be non-empty"},
+		{record: []string{"700000", "50000", "abc"}, errMsg: "invalid format"},
+	}
+
+	for _, test := range tests {
+		err := validateCsvData(test.record)
+		if test.errMsg == "" {
+			assert.NoError(t, err)
+		} else {
+			assert.EqualError(t, err, test.errMsg)
+		}
+	}
+}
+
+func TestValidateTaxValues(t *testing.T) {
+	tests := []struct {
+		incomeTaxDetail IncomeTaxDetail
+		errMsg          string
+	}{
+		{incomeTaxDetail: IncomeTaxDetail{TotalIncome: 500000, WithHoldingTax: 0, Allowances: []Allowance{{AllowanceType: "donation", Amount: 200000}}}, errMsg: ""},                                                                     // Valid income tax detail
+		{incomeTaxDetail: IncomeTaxDetail{TotalIncome: -500000, WithHoldingTax: 0, Allowances: []Allowance{{AllowanceType: "donation", Amount: 200000}}}, errMsg: "total income (-500000.00) cannot be negative"},                        // Negative total income
+		{incomeTaxDetail: IncomeTaxDetail{TotalIncome: 500000, WithHoldingTax: -10000, Allowances: []Allowance{{AllowanceType: "donation", Amount: 200000}}}, errMsg: "wht (-10000.00) cannot be negative"},                              // Negative withholding tax
+		{incomeTaxDetail: IncomeTaxDetail{TotalIncome: 500000, WithHoldingTax: 600000, Allowances: []Allowance{{AllowanceType: "donation", Amount: 200000}}}, errMsg: "wht (600000.00) cannot be greater than total income (500000.00)"}, // WHT greater than total income
+		{incomeTaxDetail: IncomeTaxDetail{TotalIncome: 500000, WithHoldingTax: 0, Allowances: []Allowance{{AllowanceType: "invalid", Amount: 200000}}}, errMsg: "invalid allowance type: invalid"},                                       // Invalid allowance type
+		{incomeTaxDetail: IncomeTaxDetail{TotalIncome: 500000, WithHoldingTax: 0, Allowances: []Allowance{{AllowanceType: "donation", Amount: -200000}}}, errMsg: "allowance amount (-200000.00) cannot be negative"},                    // Negative allowance amount
+	}
+
+	for _, test := range tests {
+		err := validateTaxValues(&test.incomeTaxDetail)
+		if test.errMsg == "" {
+			assert.NoError(t, err)
+		} else {
+			assert.EqualError(t, err, test.errMsg)
+		}
+	}
+}
