@@ -2,6 +2,8 @@ package tax
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTaxRate(t *testing.T) {
@@ -35,4 +37,18 @@ func TestTaxRate(t *testing.T) {
 		})
 	}
 
+}
+
+func TestInitialTaxLevelDetail(t *testing.T) {
+	want := []TaxLevel{
+		{Level: "0-150,000", Tax: 0.0},
+		{"150,001-500,000", 0.0},
+		{"500,001-1,000,000", 0.0},
+		{"1,000,001-2,000,000", 0.0},
+		{"2,000,001 ขึ้นไป", 0.0},
+	}
+
+	got := initialTaxLevelDetail()
+
+	assert.Equal(t, want, got)
 }
